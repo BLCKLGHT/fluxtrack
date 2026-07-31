@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   if (linked) return NextResponse.json({ error: "Linked photographs cannot be deleted." }, { status: 409 });
 
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) {
     console.error("Orphan cleanup unavailable: server credentials are not configured.");
     return NextResponse.json({ queued: false }, { status: 503 });

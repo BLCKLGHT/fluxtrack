@@ -23,7 +23,7 @@ export async function createUser(_: ActionState, formData: FormData): Promise<Ac
     password: formData.get("password"), role: formData.get("role"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the user details." };
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) return { error: "Server administration credentials are not configured." };
   const admin = createAdminClient(SUPABASE_URL, serviceKey, { auth: { persistSession: false } });
   const { data, error } = await admin.auth.admin.createUser({

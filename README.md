@@ -89,6 +89,7 @@ Open `http://localhost:3000`. Add the values below before signing in.
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser/server | Optional override for the integrated Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser/server | Optional override for the integrated publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only | Auth administration and orphan-photo cleanup |
+| `SUPABASE_SECRET_KEY` | Server only | Recommended modern alternative to the legacy service-role key |
 | `NEXT_PUBLIC_APP_URL` | Browser/server | Exact application origin used in QR validation/generation |
 | `NEXT_PUBLIC_MAX_IMAGE_BYTES` | Browser | Maximum input bytes; default 12 MiB |
 | `NEXT_PUBLIC_IMAGE_TARGET_BYTES` | Browser | Compression target; default ~2 MB |
