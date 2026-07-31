@@ -29,7 +29,7 @@ export function TrayTable({ trays }: { trays: Tray[] }) {
       <p className="muted my-4 text-sm font-bold">{filtered.length} matching {filtered.length === 1 ? "tray" : "trays"}</p>
       <div className="table-wrap">
         <table className="data-table">
-          <thead><tr><th>Tray</th><th>Status</th><th>Received</th><th>Completed</th><th>Samples</th><th>Issue samples</th><th>Issues</th><th>Elapsed</th><th><span className="sr-only">Action</span></th></tr></thead>
+          <thead><tr><th>Tray</th><th>Status</th><th>Received</th><th>Completed</th><th>Samples</th><th>Issue samples</th><th>Issues</th><th>Elapsed</th><th><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>
             {filtered.map((tray) => {
               const samples = tray.samples ?? [];
@@ -43,7 +43,7 @@ export function TrayTable({ trays }: { trays: Tray[] }) {
                   <td>{formatDate(tray.completed_at)}<br /><span className="muted text-xs">{tray.completed_profile?.display_name}</span></td>
                   <td>{samples.length}</td><td>{issueSamples}</td><td>{issues.length}</td>
                   <td>{elapsed(tray.received_at, tray.completed_at)}</td>
-                  <td><Link className="font-bold text-[var(--green)]" href={`/dashboard/trays/${tray.tray_code}`}>View</Link></td>
+                  <td><div className="flex gap-3"><Link className="font-bold text-[var(--green)]" href={`/dashboard/trays/${tray.tray_code}`}>View</Link><Link className="font-bold text-[var(--green)]" href={`/dashboard/trays/${tray.tray_code}/qr`}>QR label</Link></div></td>
                 </tr>
               );
             })}

@@ -10,7 +10,7 @@ export default async function TrayQrPage({ params }: { params: Promise<{ trayCod
   const url = `${appUrl()}/operator/trays/${tray.tray_code}`;
   return (
     <main id="main">
-      <div className="no-print"><Link href={`/dashboard/trays/${tray.tray_code}`} className="text-sm font-bold text-[var(--green)]">← Back to tray</Link></div>
+      <div className="no-print flex flex-wrap gap-5"><Link href="/dashboard/labels" className="text-sm font-bold text-[var(--green)]">← All QR labels</Link><Link href={`/dashboard/trays/${tray.tray_code}`} className="text-sm font-bold text-[var(--green)]">View tray record</Link></div>
       <section className="print-sheet card mx-auto mt-7 max-w-[800px] p-8 text-center sm:p-14">
         <p className="eyebrow">FluxTrack laboratory tray</p>
         <h1 className="mt-4 text-5xl font-black tracking-[-.05em]">{tray.tray_code}</h1>

@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { ClipboardList, FlaskConical, Gauge, QrCode, Settings, ShieldCheck, Users } from "lucide-react";
+import { ClipboardList, FlaskConical, Gauge, QrCode, ScanLine, Settings, ShieldCheck, Users } from "lucide-react";
 import { Brand } from "@/components/brand";
 import type { UserRole } from "@/lib/domain";
 
 const common = [
   { href: "/dashboard", label: "Overview", icon: Gauge },
   { href: "/dashboard/trays", label: "Trays", icon: ClipboardList },
+  { href: "/dashboard/labels", label: "QR labels", icon: QrCode },
   { href: "/dashboard/issues", label: "Issues & export", icon: FlaskConical },
 ];
 const admin = [
@@ -26,7 +27,7 @@ export function DashboardNav({ role }: { role: UserRole }) {
           </Link>
         ))}
         <Link href="/operator" className="flex min-h-12 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-bold text-[#415047] no-underline hover:bg-[#eef3ef]">
-          <QrCode size={19} aria-hidden />Operator app
+          <ScanLine size={19} aria-hidden />Operator app
         </Link>
       </nav>
     </aside>
