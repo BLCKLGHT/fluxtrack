@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TrayQr } from "@/components/tray-qr";
 import { appUrl } from "@/lib/config";
 import { getTray } from "@/lib/queries";
@@ -7,6 +8,7 @@ import { trayCodeSchema } from "@/lib/validation";
 export default async function TrayQrPage({ params }: { params: Promise<{ trayCode: string }> }) {
   const trayCode = trayCodeSchema.parse((await params).trayCode);
   const tray = await getTray(trayCode);
+  if (tray.tray_templates?.tray_code) redirect(`/dashboard/tray-sets/${tray.tray_templates.tray_code}/qr`);
   const url = `${appUrl()}/operator/trays/${tray.tray_code}`;
   return (
     <main id="main">

@@ -3,6 +3,7 @@ import { CheckCircle2, Clock3, FlaskConical, PackageCheck } from "lucide-react";
 import { ReceiveTrayButton } from "@/components/tray-action-button";
 import { SampleList } from "@/components/sample-list";
 import { TrayStatusBadge } from "@/components/status-badge";
+import { StartTrayRunButton } from "@/components/start-tray-run-button";
 import { getTray } from "@/lib/queries";
 import { formatDate, formatDay } from "@/lib/utils";
 import { trayCodeSchema } from "@/lib/validation";
@@ -40,7 +41,13 @@ export default async function OperatorTrayPage({ params, searchParams }: {
         </div>
       </section>
       {tray.status === "created" && <div className="mt-6"><ReceiveTrayButton trayId={tray.id} trayCode={tray.tray_code} version={tray.version} /></div>}
-      {tray.status === "completed" && <div className="notice notice-info mt-6">This tray is complete and read-only for process operators.</div>}
+      {tray.status === "completed" && (
+        <div className="card mt-6 p-5">
+          <h2 className="font-black">This processing run is complete</h2>
+          <p className="muted mt-2 text-sm">The results above remain read-only. When this physical tray comes around again, start a fresh run with the same cell layout.</p>
+          {tray.template_id ? <div className="mt-5"><StartTrayRunButton templateId={tray.template_id} label="Process this tray again" /></div> : <div className="notice notice-info mt-4">This older tray record is not linked to a reusable physical tray.</div>}
+        </div>
+      )}
       {tray.status !== "created" && <div className="mt-9"><SampleList samples={samples} trayCode={tray.tray_code} readOnly={readOnly} /></div>}
       {!readOnly && (
         <div className="sticky bottom-[82px] mt-8 rounded-[20px] border border-[#ccd6d0] bg-white/95 p-3 shadow-[0_-8px_30px_rgba(23,33,29,.10)] backdrop-blur">
