@@ -11,7 +11,7 @@ export default async function OperatorLayout({ children }: { children: React.Rea
     <>
       <ConnectionStatus />
       <header className="operator-shell operator-safe-header !pb-0">
-        <Brand href="/operator" />
+        <Brand href="/operator" hayesIcon />
       </header>
       {children}
       <OperatorNav />
