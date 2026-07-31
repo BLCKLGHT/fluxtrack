@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { issueSchema, parseTrustedTrayQr, trayCodeSchema } from "@/lib/validation";
+import { issueSchema, parseTrustedTrayQr, registerSchema, trayCodeSchema } from "@/lib/validation";
 
 describe("tray code validation", () => {
   it("normalises a valid code", () => {
@@ -44,5 +44,25 @@ describe("issue payload", () => {
       photoSizeBytes: 20_000_000,
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("registration validation", () => {
+  it("accepts a strong matching password", () => {
+    expect(registerSchema.safeParse({
+      displayName: "Test Operator",
+      email: "operator@example.test",
+      password: "LongLaboratory9",
+      confirmPassword: "LongLaboratory9",
+    }).success).toBe(true);
+  });
+
+  it("rejects mismatched passwords", () => {
+    expect(registerSchema.safeParse({
+      displayName: "Test Operator",
+      email: "operator@example.test",
+      password: "LongLaboratory9",
+      confirmPassword: "DifferentPassword9",
+    }).success).toBe(false);
   });
 });

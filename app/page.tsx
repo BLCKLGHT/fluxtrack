@@ -7,7 +7,10 @@ export default function HomePage() {
     <main id="main">
       <header className="shell flex items-center justify-between py-6">
         <Brand />
-        <Link className="btn btn-secondary !min-h-11" href="/login">Sign in</Link>
+        <div className="flex items-center gap-2">
+          <Link className="btn btn-secondary !min-h-11" href="/login">Sign in</Link>
+          <Link className="btn btn-primary !min-h-11" href="/register">Register</Link>
+        </div>
       </header>
       <section className="shell grid min-h-[calc(100vh-100px)] items-center gap-12 py-14 lg:grid-cols-[1.15fr_.85fr]">
         <div>

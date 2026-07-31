@@ -11,6 +11,23 @@ export const loginSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
+export const registerSchema = z
+  .object({
+    displayName: z.string().trim().min(2, "Enter your name.").max(120),
+    email: z.string().trim().email("Enter a valid email address."),
+    password: z
+      .string()
+      .min(12, "Use at least 12 characters.")
+      .regex(/[a-z]/, "Include a lowercase letter.")
+      .regex(/[A-Z]/, "Include an uppercase letter.")
+      .regex(/[0-9]/, "Include a number."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
 export const issueSchema = z
   .object({
     issueId: z.string().uuid(),
