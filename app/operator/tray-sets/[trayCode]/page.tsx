@@ -1,18 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CalendarDays, FlaskConical, History } from "lucide-react";
 import { StartTrayRunButton } from "@/components/start-tray-run-button";
-import { TrayStatusBadge } from "@/components/status-badge";
-import { getTrayTemplate } from "@/lib/queries";
+import { getOpenRunForPhysicalTray, getTrayTemplate } from "@/lib/queries";
 import { formatDate } from "@/lib/utils";
 import { trayCodeSchema } from "@/lib/validation";
 
-const OPEN = new Set(["created", "received", "in_progress", "reopened"]);
-
 export default async function PhysicalTrayPage({ params }: { params: Promise<{ trayCode: string }> }) {
   const code = trayCodeSchema.parse((await params).trayCode);
+  const open = await getOpenRunForPhysicalTray(code);
+  if (open) redirect(`/operator/trays/${open.tray_code}`);
   const template = await getTrayTemplate(code);
   const runs = template.trays ?? [];
-  const open = runs.find((run) => OPEN.has(run.status));
   const lastCompleted = runs.find((run) => run.status === "completed");
   return (
     <main id="main" className="operator-shell">
@@ -23,8 +22,7 @@ export default async function PhysicalTrayPage({ params }: { params: Promise<{ t
         <div className="bg-white p-4"><History size={18} className="text-[var(--green)]" /><p className="muted mt-3 text-xs font-bold uppercase">Runs</p><p className="mt-1 font-extrabold">{runs.length}</p></div>
         <div className="bg-white p-4"><CalendarDays size={18} className="text-[var(--green)]" /><p className="muted mt-3 text-xs font-bold uppercase">Last done</p><p className="mt-1 text-sm font-extrabold">{lastCompleted ? formatDate(lastCompleted.completed_at) : "Not yet"}</p></div>
       </div>
-      {open ? <div className="card mt-6 p-5"><div className="flex items-center justify-between gap-3"><div><p className="font-black">Run {open.run_number}</p><p className="muted mt-1 text-sm">Started {formatDate(open.created_at)}</p></div><TrayStatusBadge status={open.status} /></div><div className="mt-5"><StartTrayRunButton templateId={template.id} resume /></div></div>
-        : <div className="card mt-6 p-5"><h2 className="font-black">Ready for the next processing day</h2><p className="muted mt-2 text-sm">Starting creates a fresh copy of all {template.tray_template_samples?.length ?? 0} cells. Previous results stay in history.</p><div className="mt-5"><StartTrayRunButton templateId={template.id} /></div></div>}
+      <div className="card mt-6 p-5"><h2 className="font-black">Ready for the next processing day</h2><p className="muted mt-2 text-sm">Starting creates a fresh copy of all {template.tray_template_samples?.length ?? 0} cells. Previous results stay in history.</p><div className="mt-5"><StartTrayRunButton templateId={template.id} /></div></div>
     </main>
   );
 }

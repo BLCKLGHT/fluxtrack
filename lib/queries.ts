@@ -60,7 +60,7 @@ export async function getTrayTemplates(): Promise<TrayTemplate[]> {
     .select(`
       *,
       tray_template_samples(*),
-      trays(*, samples(id, status, sample_issues(id, sample_id, status)))
+      trays(id, tray_code, status, run_number, processing_date, created_at, received_at, completed_at)
     `)
     .order("tray_code")
     .order("display_order", { referencedTable: "tray_template_samples", ascending: true })
@@ -69,11 +69,35 @@ export async function getTrayTemplates(): Promise<TrayTemplate[]> {
   return data as unknown as TrayTemplate[];
 }
 
+export async function getOpenRunForPhysicalTray(trayCode: string): Promise<Pick<Tray, "id" | "tray_code" | "status"> | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("trays")
+    .select("id, tray_code, status, tray_templates!inner(tray_code)")
+    .eq("tray_templates.tray_code", trayCode.toUpperCase())
+    .in("status", ["created", "received", "in_progress", "reopened"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error("Unable to resolve the physical tray.");
+  return data as unknown as Pick<Tray, "id" | "tray_code" | "status"> | null;
+}
+
 export const getTrayTemplate = cache(async (trayCode: string): Promise<TrayTemplate> => {
-  const templates = await getTrayTemplates();
-  const template = templates.find((item) => item.tray_code === trayCode.toUpperCase());
-  if (!template) notFound();
-  return template;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tray_templates")
+    .select(`
+      *,
+      tray_template_samples(*),
+      trays(*, samples(id, status, sample_issues(id, sample_id, status)))
+    `)
+    .eq("tray_code", trayCode.toUpperCase())
+    .order("display_order", { referencedTable: "tray_template_samples", ascending: true })
+    .order("created_at", { referencedTable: "trays", ascending: false })
+    .single();
+  if (error || !data) notFound();
+  return data as unknown as TrayTemplate;
 });
 
 export async function getIssues(): Promise<SampleIssue[]> {

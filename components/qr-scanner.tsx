@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
-import { Camera, Keyboard, LoaderCircle } from "lucide-react";
-import { parseTrustedFluxQr, trayCodeSchema } from "@/lib/validation";
+import Link from "next/link";
+import { Camera, List, LoaderCircle } from "lucide-react";
+import { parseTrustedFluxQr } from "@/lib/validation";
 
 export function QrScanner({ appOrigin }: { appOrigin: string }) {
   const router = useRouter();
@@ -12,7 +13,6 @@ export function QrScanner({ appOrigin }: { appOrigin: string }) {
   const controlsRef = useRef<IScannerControls | null>(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [starting, setStarting] = useState(false);
-  const [manual, setManual] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => () => controlsRef.current?.stop(), []);
@@ -45,16 +45,6 @@ export function QrScanner({ appOrigin }: { appOrigin: string }) {
     }
   }
 
-  function openManual(event: React.FormEvent) {
-    event.preventDefault();
-    const parsed = trayCodeSchema.safeParse(manual);
-    if (!parsed.success) {
-      setError("Enter a tray code such as FLUX-TEST-001.");
-      return;
-    }
-    router.push(`/operator/tray-sets/${parsed.data}`);
-  }
-
   return (
     <div>
       {error && <div className="notice notice-error mb-4" role="alert">{error}</div>}
@@ -77,12 +67,7 @@ export function QrScanner({ appOrigin }: { appOrigin: string }) {
           </button>
         </div>
       </div>
-      <div className="my-7 flex items-center gap-3"><div className="hairline flex-1" /><span className="muted text-xs font-bold uppercase">or enter code</span><div className="hairline flex-1" /></div>
-      <form onSubmit={openManual}>
-        <label className="label" htmlFor="tray-code">Tray code</label>
-        <input className="field uppercase" id="tray-code" placeholder="FLUX-TEST-001" autoCapitalize="characters" value={manual} onChange={(event) => setManual(event.target.value)} />
-        <button className="btn btn-secondary mt-3 w-full" type="submit"><Keyboard size={20} aria-hidden /> Open tray</button>
-      </form>
+      <Link href="/operator/tray-sets" className="btn btn-secondary mt-5 w-full"><List size={20} aria-hidden />View physical trays</Link>
     </div>
   );
 }

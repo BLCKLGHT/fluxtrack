@@ -20,7 +20,7 @@ export function OperatorNav() {
         {items.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href === "/operator/tray-sets" && (pathname.startsWith("/operator/tray-sets/") || pathname.startsWith("/operator/trays/")));
           return (
-            <Link key={href} href={href} className={cn(
+            <Link key={href} href={href} prefetch className={cn(
               "flex min-h-[72px] flex-col items-center justify-center gap-1 px-1 text-[11px] font-bold no-underline",
               active ? "text-[var(--green)]" : "text-[#617069]",
             )} aria-current={active ? "page" : undefined}>

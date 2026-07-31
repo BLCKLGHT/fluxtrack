@@ -17,6 +17,9 @@ export async function refreshSession(request: NextRequest) {
       },
     },
   });
-  await supabase.auth.getUser();
+  // Verify locally against Supabase's cached signing keys where possible. This
+  // still refreshes near-expiry sessions, without an Auth API round trip on
+  // every navigation.
+  await supabase.auth.getClaims();
   return response;
 }
