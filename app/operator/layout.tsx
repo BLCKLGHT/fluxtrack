@@ -10,7 +10,7 @@ export default async function OperatorLayout({ children }: { children: React.Rea
   return (
     <>
       <ConnectionStatus />
-      <header className="operator-shell !pb-0">
+      <header className="operator-shell operator-safe-header !pb-0">
         <Brand href="/operator" />
       </header>
       {children}

@@ -32,6 +32,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .shell { width: min(100% - 32px, 1180px); margin-inline: auto; }
 .operator-shell { width: min(100%, 680px); margin-inline: auto; padding: 20px 18px 112px; }
+.operator-safe-header { padding-top: calc(20px + env(safe-area-inset-top, 0px)); }
 .eyebrow {
   color: var(--green); font-size: .75rem; font-weight: 800; letter-spacing: .13em;
   text-transform: uppercase;
