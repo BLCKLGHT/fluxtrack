@@ -86,8 +86,8 @@ Open `http://localhost:3000`. Add the values below before signing in.
 
 | Variable | Scope | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Browser/server | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser/server | RLS-protected publishable/anon key |
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser/server | Optional override for the integrated Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser/server | Optional override for the integrated publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server only | Auth administration and orphan-photo cleanup |
 | `NEXT_PUBLIC_APP_URL` | Browser/server | Exact application origin used in QR validation/generation |
 | `NEXT_PUBLIC_MAX_IMAGE_BYTES` | Browser | Maximum input bytes; default 12 MiB |
@@ -97,6 +97,11 @@ Open `http://localhost:3000`. Add the values below before signing in.
 
 Never prefix the service-role key with `NEXT_PUBLIC_`, place it in source
 control, or use it in browser code.
+
+The repository includes this deployment's Supabase URL and publishable key as
+browser-safe defaults, so Vercel deployments from Git connect automatically.
+Setting the corresponding `NEXT_PUBLIC_` variables overrides those defaults.
+RLS—not secrecy of the publishable key—is the data-security boundary.
 
 ## Supabase setup
 

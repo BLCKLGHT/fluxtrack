@@ -7,6 +7,7 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { trayCodeSchema } from "@/lib/validation";
 import type { ActionState } from "@/app/actions/trays";
+import { SUPABASE_URL } from "@/lib/config";
 
 const userSchema = z.object({
   displayName: z.string().trim().min(2).max(120),
@@ -22,10 +23,9 @@ export async function createUser(_: ActionState, formData: FormData): Promise<Ac
     password: formData.get("password"), role: formData.get("role"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the user details." };
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) return { error: "Server administration credentials are not configured." };
-  const admin = createAdminClient(url, serviceKey, { auth: { persistSession: false } });
+  if (!serviceKey) return { error: "Server administration credentials are not configured." };
+  const admin = createAdminClient(SUPABASE_URL, serviceKey, { auth: { persistSession: false } });
   const { data, error } = await admin.auth.admin.createUser({
     email: parsed.data.email,
     password: parsed.data.password,

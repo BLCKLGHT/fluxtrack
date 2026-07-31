@@ -1,7 +1,7 @@
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { PHOTO_BUCKET } from "@/lib/config";
+import { PHOTO_BUCKET, SUPABASE_URL } from "@/lib/config";
 import { z } from "zod";
 
 const bodySchema = z.object({
@@ -22,13 +22,12 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   if (linked) return NextResponse.json({ error: "Linked photographs cannot be deleted." }, { status: 409 });
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) {
+  if (!serviceKey) {
     console.error("Orphan cleanup unavailable: server credentials are not configured.");
     return NextResponse.json({ queued: false }, { status: 503 });
   }
-  const admin = createAdminClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const admin = createAdminClient(SUPABASE_URL, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { error } = await admin.storage.from(PHOTO_BUCKET).remove([parsed.data.path]);
   if (error) return NextResponse.json({ error: "Cleanup failed." }, { status: 500 });
   return NextResponse.json({ removed: true });
