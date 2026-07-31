@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Brand } from "@/components/brand";
 import { ConnectionStatus } from "@/components/connection-status";
 import { OperatorNav } from "@/components/operator-nav";
@@ -10,8 +11,9 @@ export default async function OperatorLayout({ children }: { children: React.Rea
   return (
     <>
       <ConnectionStatus />
-      <header className="operator-shell operator-safe-header !pb-0">
-        <Brand href="/operator" hayesIcon />
+      <header className="operator-shell operator-safe-header flex items-center justify-between !pb-0">
+        <Brand href="/operator" />
+        <Image src="/hayes-icon.png" alt="Hayes Industries" width={350} height={349} className="h-7 w-7 opacity-50" priority />
       </header>
       {children}
       <OperatorNav />
