@@ -6,6 +6,11 @@ record sample problems with photographic evidence, and complete the tray. A
 desktop dashboard gives team viewers and administrators searchable records,
 private evidence viewing, CSV export, metrics, configuration, and audit history.
 
+Dashboard reporting defaults to the current Hobart week and supports Today,
+This week, This month, This year, and custom date ranges. Filters execute in
+Postgres against indexed processing/report dates rather than downloading the
+entire history to the browser.
+
 The prototype is deployable but is **not approved for real operational data**
 until the reviews in
 [the production-readiness checklist](docs/production-readiness-checklist.md)

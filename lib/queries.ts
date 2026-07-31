@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { IssueCategory, SampleIssue, Tray, TrayTemplate } from "@/lib/domain";
 import { buildDemoData } from "@/lib/demo-data";
+import type { DashboardDateRange } from "@/lib/date-range";
 
 export const getTray = cache(async (trayCode: string, includeDemo = false): Promise<Tray> => {
   const supabase = await createClient();
@@ -42,7 +43,7 @@ export async function getCategories(): Promise<IssueCategory[]> {
   return data as IssueCategory[];
 }
 
-export async function getTrays(statuses?: string[], includeDemo = false): Promise<Tray[]> {
+export async function getTrays(statuses?: string[], includeDemo = false, range?: DashboardDateRange): Promise<Tray[]> {
   const supabase = await createClient();
   let query = supabase
     .from("trays")
@@ -54,11 +55,14 @@ export async function getTrays(statuses?: string[], includeDemo = false): Promis
     `)
     .order("created_at", { ascending: false });
   if (statuses?.length) query = query.in("status", statuses);
+  if (range) query = query.gte("processing_date", range.from).lte("processing_date", range.to);
   const { data, error } = await query;
   if (error) throw new Error("Unable to load trays.");
   const real = data as unknown as Tray[];
   if (!includeDemo) return real;
-  const demo = buildDemoData().trays.filter((tray) => !statuses?.length || statuses.includes(tray.status));
+  const demo = buildDemoData().trays.filter((tray) =>
+    (!statuses?.length || statuses.includes(tray.status)) && (!range || (tray.processing_date >= range.from && tray.processing_date <= range.to)),
+  );
   return [...real, ...demo];
 }
 
@@ -114,9 +118,9 @@ export const getTrayTemplate = cache(async (trayCode: string, includeDemo = fals
   return data as unknown as TrayTemplate;
 });
 
-export async function getIssues(includeDemo = false): Promise<SampleIssue[]> {
+export async function getIssues(includeDemo = false, range?: DashboardDateRange): Promise<SampleIssue[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("sample_issues")
     .select(`
       *,
@@ -126,14 +130,19 @@ export async function getIssues(includeDemo = false): Promise<SampleIssue[]> {
       trays (tray_code)
     `)
     .order("reported_at", { ascending: false });
+  if (range) query = query.gte("reported_at", range.fromUtc).lt("reported_at", range.toExclusiveUtc);
+  const { data, error } = await query;
   if (error) throw new Error("Unable to load issues.");
   const real = data as unknown as SampleIssue[];
   if (!includeDemo) return real;
-  return [...real, ...buildDemoData(await getCategories()).issues];
+  const demo = buildDemoData(await getCategories()).issues.filter((issue) =>
+    !range || (issue.reported_at >= range.fromUtc && issue.reported_at < range.toExclusiveUtc),
+  );
+  return [...real, ...demo];
 }
 
-export async function getDashboardData(includeDemo = false) {
-  const [trays, issues] = await Promise.all([getTrays(undefined, includeDemo), getIssues(includeDemo)]);
+export async function getDashboardData(includeDemo = false, range?: DashboardDateRange) {
+  const [trays, issues] = await Promise.all([getTrays(undefined, includeDemo, range), getIssues(includeDemo, range)]);
   return { trays, issues };
 }
 

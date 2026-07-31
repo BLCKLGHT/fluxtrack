@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { SampleIssue } from "@/lib/domain";
 
-export function DashboardCharts({ issues }: { issues: SampleIssue[] }) {
+export function DashboardCharts({ issues, timeBucket = "day" }: { issues: SampleIssue[]; timeBucket?: "day" | "month" }) {
   const countBy = (key: "category" | "ownership" | "stage" | "time") => {
     const map = new Map<string, number>();
     for (const issue of issues.filter((item) => item.status === "active")) {
@@ -12,11 +12,12 @@ export function DashboardCharts({ issues }: { issues: SampleIssue[] }) {
         : key === "ownership"
           ? issue.ownership_snapshot
           : key === "time"
-            ? new Intl.DateTimeFormat("en-AU", { day: "2-digit", month: "short" }).format(new Date(issue.reported_at))
+            ? new Intl.DateTimeFormat("en-AU", timeBucket === "month" ? { month: "short", year: "2-digit" } : { day: "2-digit", month: "short" }).format(new Date(issue.reported_at))
             : issue.processing_stage;
       map.set(value, (map.get(value) ?? 0) + 1);
     }
-    return [...map].map(([name, count]) => ({ name: name.replaceAll("_", " "), count }));
+    const values = [...map].map(([name, count]) => ({ name: name.replaceAll("_", " "), count }));
+    return key === "time" ? values.reverse() : values;
   };
   const charts = [
     ["Issues by category", countBy("category")],
