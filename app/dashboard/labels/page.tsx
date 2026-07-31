@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { QrLabelDirectory } from "@/components/qr-label-directory";
 import { getTrayTemplates } from "@/lib/queries";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export default async function QrLabelsPage() {
-  const trays = await getTrayTemplates();
+  const trays = await getTrayTemplates(await isDemoMode());
   return (
     <main id="main">
       <div className="flex flex-wrap items-end justify-between gap-4">

@@ -37,7 +37,7 @@ export function TrayTable({ trays }: { trays: Tray[] }) {
               const issueSamples = new Set(issues.map((issue) => issue.sample_id)).size || samples.filter((item) => item.status === "issue_reported").length;
               return (
                 <tr key={tray.id}>
-                  <td><strong>{tray.tray_code}</strong><br /><span className="muted text-xs">{tray.source}</span></td>
+                  <td><strong>{tray.tray_code}</strong>{tray.is_demo && <span className="ml-2 rounded-full bg-[#fff1b8] px-2 py-1 text-[10px] font-black uppercase">Demo</span>}<br /><span className="muted text-xs">{tray.source}</span></td>
                   <td>{formatDay(tray.processing_date)}</td>
                   <td><TrayStatusBadge status={tray.status as TrayStatus} /></td>
                   <td>{formatDate(tray.received_at)}<br /><span className="muted text-xs">{tray.received_profile?.display_name}</span></td>

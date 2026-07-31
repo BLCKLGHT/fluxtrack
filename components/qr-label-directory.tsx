@@ -46,6 +46,7 @@ export function QrLabelDirectory({ trays }: { trays: TrayTemplate[] }) {
                 <span className="rounded-full bg-[#e7f4ed] px-3 py-1 text-xs font-extrabold text-[var(--green)]">Permanent label</span>
               </div>
               <h2 className="mt-5 text-2xl font-black tracking-[-.04em]">{tray.tray_code}</h2>
+              {tray.is_demo && <span className="mt-2 w-fit rounded-full bg-[#fff1b8] px-2 py-1 text-[10px] font-black uppercase">Demo</span>}
               <p className="muted mt-1 text-sm font-semibold">{tray.tray_name} · {tray.source}</p>
               <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl bg-[#f3f6f4] p-4 text-sm">
                 <div><dt className="muted text-xs font-bold uppercase">Samples</dt><dd className="mt-1 font-extrabold">{samples.length}</dd></div>
@@ -53,9 +54,7 @@ export function QrLabelDirectory({ trays }: { trays: TrayTemplate[] }) {
               </dl>
               <p className="mt-4 text-xs font-bold text-[var(--green-dark)]">Print once · reuse every processing round</p>
               <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
-                <Link className="btn btn-primary" href={`/dashboard/tray-sets/${tray.tray_code}/qr`}>
-                  <Printer size={18} aria-hidden />Generate & print
-                </Link>
+                {tray.is_demo ? <span className="btn btn-secondary cursor-default"><QrCode size={18} aria-hidden />Synthetic preview</span> : <Link className="btn btn-primary" href={`/dashboard/tray-sets/${tray.tray_code}/qr`}><Printer size={18} aria-hidden />Generate & print</Link>}
                 <Link className="btn btn-secondary" href={`/dashboard/tray-sets/${tray.tray_code}`}>
                   <ExternalLink size={18} aria-hidden />Run history
                 </Link>

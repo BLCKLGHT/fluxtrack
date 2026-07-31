@@ -224,6 +224,14 @@ The scanner accepts only the configured origin and exact operator routes. The
 permanent physical-tray route resumes its one open run or offers to start the
 next dated run. Legacy run-specific QR links remain readable.
 
+## Manager demonstration mode
+
+Administrators can open **Dashboard → Settings** and switch on demonstration
+mode. It adds clearly labelled synthetic trays, recurring runs, samples,
+issues, operators, charts, and histories alongside live records. The setting
+is browser-local, expires automatically, and never writes demonstration data
+to Supabase. Switch it off to return immediately to live records only.
+
 ## Tests and quality checks
 
 ```bash

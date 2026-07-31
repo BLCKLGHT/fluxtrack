@@ -11,6 +11,7 @@ const common = [
   { href: "/dashboard/issues", label: "Issues & export", icon: FlaskConical },
 ];
 const admin = [
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
   { href: "/dashboard/users", label: "Users", icon: Users },
   { href: "/dashboard/settings/categories", label: "Issue categories", icon: Settings },
   { href: "/dashboard/audit", label: "Audit records", icon: ShieldCheck },

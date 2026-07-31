@@ -41,6 +41,7 @@ export interface SampleIssue {
   profiles?: Pick<Profile, "display_name"> | null;
   samples?: { sample_number: string } | null;
   trays?: { tray_code: string } | null;
+  is_demo?: boolean;
 }
 
 export interface Sample {
@@ -73,6 +74,8 @@ export interface Tray {
   samples?: Sample[];
   received_profile?: Pick<Profile, "display_name"> | null;
   completed_profile?: Pick<Profile, "display_name"> | null;
+  tray_templates?: { tray_code: string } | null;
+  is_demo?: boolean;
 }
 
 export interface TrayTemplateSample {
@@ -92,6 +95,7 @@ export interface TrayTemplate {
   created_at: string;
   tray_template_samples?: TrayTemplateSample[];
   trays?: Tray[];
+  is_demo?: boolean;
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {

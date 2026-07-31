@@ -1,8 +1,10 @@
 import { IssueTable } from "@/components/issue-table";
 import { getCategories, getIssues } from "@/lib/queries";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export default async function IssuesPage() {
-  const [issues, categories] = await Promise.all([getIssues(), getCategories()]);
+  const demo = await isDemoMode();
+  const [issues, categories] = await Promise.all([getIssues(demo), getCategories()]);
   return (
     <main id="main">
       <p className="eyebrow">Evidence register</p><h1 className="page-title mt-3">Sample issues</h1>

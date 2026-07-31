@@ -11,15 +11,16 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 import { trayCodeSchema } from "@/lib/validation";
 import { VoidIssueForm } from "@/components/void-issue-form";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export default async function TrayDetailPage({ params }: { params: Promise<{ trayCode: string }> }) {
   const trayCode = trayCodeSchema.parse((await params).trayCode);
-  const profile = await requireProfile(["team_viewer", "administrator"]);
-  const tray = await getTray(trayCode);
+  const [profile, demo] = await Promise.all([requireProfile(["team_viewer", "administrator"]), isDemoMode()]);
+  const tray = await getTray(trayCode, demo);
   const issues = (tray.samples ?? []).flatMap((sample) => (sample.sample_issues ?? []).map((issue) => ({ ...issue, sample })));
   const supabase = await createClient();
   const signed = new Map<string, string>();
-  await Promise.all(issues.map(async (issue) => {
+  await Promise.all(issues.filter((issue) => issue.photo_storage_path).map(async (issue) => {
     const { data } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(issue.photo_storage_path, 300);
     if (data?.signedUrl) signed.set(issue.id, data.signedUrl);
   }));
@@ -36,7 +37,7 @@ export default async function TrayDetailPage({ params }: { params: Promise<{ tra
       <Link href="/dashboard/trays" className="text-sm font-bold text-[var(--green)]">← All trays</Link>
       <div className="mt-7 flex flex-wrap items-start justify-between gap-5">
         <div><p className="eyebrow">Tray record</p><h1 className="page-title mt-3">{tray.tray_code}</h1><p className="muted mt-3">{tray.tray_name} · {tray.source}</p></div>
-        <div className="flex flex-wrap items-center gap-3"><TrayStatusBadge status={tray.status} /><Link href={`/dashboard/trays/${tray.tray_code}/qr`} className="btn btn-secondary"><QrCode size={18} aria-hidden />QR label</Link></div>
+        <div className="flex flex-wrap items-center gap-3"><TrayStatusBadge status={tray.status} />{tray.tray_templates?.tray_code && !tray.is_demo && <Link href={`/dashboard/tray-sets/${tray.tray_templates.tray_code}/qr`} className="btn btn-secondary"><QrCode size={18} aria-hidden />Permanent QR</Link>}</div>
       </div>
       <section className="card mt-7 p-6">
         <h2 className="font-extrabold">Lifecycle</h2>
@@ -63,8 +64,8 @@ export default async function TrayDetailPage({ params }: { params: Promise<{ tra
                         <div><dt className="muted text-xs font-bold uppercase">Status</dt><dd className="mt-1">{issue.status}</dd></div>
                         {issue.comment && <div className="sm:col-span-3"><dt className="muted text-xs font-bold uppercase">Comment</dt><dd className="mt-1">{issue.comment}</dd></div>}
                       </dl>
-                      {signed.get(issue.id) ? <PhotoViewer url={signed.get(issue.id)!} alt={`Evidence for sample ${sample.sample_number}, ${issue.issue_categories?.name}`} /> : <div className="notice notice-error text-sm">Photo unavailable</div>}
-                      {profile.role === "administrator" && issue.status === "active" && <div className="md:col-span-2"><VoidIssueForm issueId={issue.id} trayCode={tray.tray_code} /></div>}
+                      {issue.is_demo ? <div className="notice notice-info text-sm">Demonstration photograph recorded</div> : signed.get(issue.id) ? <PhotoViewer url={signed.get(issue.id)!} alt={`Evidence for sample ${sample.sample_number}, ${issue.issue_categories?.name}`} /> : <div className="notice notice-error text-sm">Photo unavailable</div>}
+                      {profile.role === "administrator" && issue.status === "active" && !issue.is_demo && <div className="md:col-span-2"><VoidIssueForm issueId={issue.id} trayCode={tray.tray_code} /></div>}
                     </div>
                   ))}
                 </div>
@@ -75,7 +76,7 @@ export default async function TrayDetailPage({ params }: { params: Promise<{ tra
       </section>
       {profile.role === "administrator" && (
         <section className="mt-8">
-          {tray.status === "completed" && <ReopenForm trayId={tray.id} trayCode={tray.tray_code} />}
+          {tray.status === "completed" && !tray.is_demo && <ReopenForm trayId={tray.id} trayCode={tray.tray_code} />}
           <div className="card mt-5 p-5"><h2 className="font-extrabold">Audit history</h2>{audit.length ? <ol className="mt-4 space-y-3">{audit.map((event) => <li key={event.id} className="border-l-2 border-[#cad4ce] pl-4 text-sm"><strong>{event.action.replaceAll("_", " ")}</strong><p className="muted mt-1">{formatDate(event.occurred_at)} · {event.profiles?.display_name ?? "System"}</p>{event.reason && <p className="mt-1">{event.reason}</p>}</li>)}</ol> : <p className="muted mt-3 text-sm">No audit events visible.</p>}</div>
         </section>
       )}

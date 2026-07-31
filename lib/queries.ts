@@ -2,13 +2,15 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { IssueCategory, SampleIssue, Tray, TrayTemplate } from "@/lib/domain";
+import { buildDemoData } from "@/lib/demo-data";
 
-export const getTray = cache(async (trayCode: string): Promise<Tray> => {
+export const getTray = cache(async (trayCode: string, includeDemo = false): Promise<Tray> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("trays")
     .select(`
       *,
+      tray_templates(tray_code),
       samples (
         *,
         sample_issues (
@@ -21,7 +23,11 @@ export const getTray = cache(async (trayCode: string): Promise<Tray> => {
     .eq("tray_code", trayCode.toUpperCase())
     .order("sample_number", { referencedTable: "samples", ascending: true })
     .single();
-  if (error || !data) notFound();
+  if (error || !data) {
+    const demoTray = includeDemo ? buildDemoData().trays.find((item) => item.tray_code === trayCode.toUpperCase()) : null;
+    if (demoTray) return demoTray;
+    notFound();
+  }
   return data as unknown as Tray;
 });
 
@@ -36,7 +42,7 @@ export async function getCategories(): Promise<IssueCategory[]> {
   return data as IssueCategory[];
 }
 
-export async function getTrays(statuses?: string[]): Promise<Tray[]> {
+export async function getTrays(statuses?: string[], includeDemo = false): Promise<Tray[]> {
   const supabase = await createClient();
   let query = supabase
     .from("trays")
@@ -50,10 +56,13 @@ export async function getTrays(statuses?: string[]): Promise<Tray[]> {
   if (statuses?.length) query = query.in("status", statuses);
   const { data, error } = await query;
   if (error) throw new Error("Unable to load trays.");
-  return data as unknown as Tray[];
+  const real = data as unknown as Tray[];
+  if (!includeDemo) return real;
+  const demo = buildDemoData().trays.filter((tray) => !statuses?.length || statuses.includes(tray.status));
+  return [...real, ...demo];
 }
 
-export async function getTrayTemplates(): Promise<TrayTemplate[]> {
+export async function getTrayTemplates(includeDemo = false): Promise<TrayTemplate[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("tray_templates")
@@ -66,7 +75,8 @@ export async function getTrayTemplates(): Promise<TrayTemplate[]> {
     .order("display_order", { referencedTable: "tray_template_samples", ascending: true })
     .order("created_at", { referencedTable: "trays", ascending: false });
   if (error) throw new Error("Unable to load the physical tray workflow.");
-  return data as unknown as TrayTemplate[];
+  const real = data as unknown as TrayTemplate[];
+  return includeDemo ? [...real, ...buildDemoData().templates] : real;
 }
 
 export async function getOpenRunForPhysicalTray(trayCode: string): Promise<Pick<Tray, "id" | "tray_code" | "status"> | null> {
@@ -83,7 +93,7 @@ export async function getOpenRunForPhysicalTray(trayCode: string): Promise<Pick<
   return data as unknown as Pick<Tray, "id" | "tray_code" | "status"> | null;
 }
 
-export const getTrayTemplate = cache(async (trayCode: string): Promise<TrayTemplate> => {
+export const getTrayTemplate = cache(async (trayCode: string, includeDemo = false): Promise<TrayTemplate> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("tray_templates")
@@ -96,11 +106,15 @@ export const getTrayTemplate = cache(async (trayCode: string): Promise<TrayTempl
     .order("display_order", { referencedTable: "tray_template_samples", ascending: true })
     .order("created_at", { referencedTable: "trays", ascending: false })
     .single();
-  if (error || !data) notFound();
+  if (error || !data) {
+    const demoTemplate = includeDemo ? buildDemoData().templates.find((item) => item.tray_code === trayCode.toUpperCase()) : null;
+    if (demoTemplate) return demoTemplate;
+    notFound();
+  }
   return data as unknown as TrayTemplate;
 });
 
-export async function getIssues(): Promise<SampleIssue[]> {
+export async function getIssues(includeDemo = false): Promise<SampleIssue[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("sample_issues")
@@ -113,11 +127,13 @@ export async function getIssues(): Promise<SampleIssue[]> {
     `)
     .order("reported_at", { ascending: false });
   if (error) throw new Error("Unable to load issues.");
-  return data as unknown as SampleIssue[];
+  const real = data as unknown as SampleIssue[];
+  if (!includeDemo) return real;
+  return [...real, ...buildDemoData(await getCategories()).issues];
 }
 
-export async function getDashboardData() {
-  const [trays, issues] = await Promise.all([getTrays(), getIssues()]);
+export async function getDashboardData(includeDemo = false) {
+  const [trays, issues] = await Promise.all([getTrays(undefined, includeDemo), getIssues(includeDemo)]);
   return { trays, issues };
 }
 

@@ -3,10 +3,11 @@ import { TrayQr } from "@/components/tray-qr";
 import { appUrl } from "@/lib/config";
 import { getTrayTemplate } from "@/lib/queries";
 import { trayCodeSchema } from "@/lib/validation";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export default async function PhysicalTrayQrPage({ params }: { params: Promise<{ trayCode: string }> }) {
   const code = trayCodeSchema.parse((await params).trayCode);
-  const tray = await getTrayTemplate(code);
+  const tray = await getTrayTemplate(code, await isDemoMode());
   const url = `${appUrl()}/operator/tray-sets/${tray.tray_code}`;
   return <main id="main">
     <div className="no-print flex flex-wrap gap-5"><Link href="/dashboard/labels" className="text-sm font-bold text-[var(--green)]">← All QR labels</Link><Link href={`/dashboard/tray-sets/${tray.tray_code}`} className="text-sm font-bold text-[var(--green)]">View run history</Link></div>

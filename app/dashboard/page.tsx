@@ -2,9 +2,10 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { DashboardCharts } from "@/components/dashboard-charts";
 import { getDashboardData } from "@/lib/queries";
+import { isDemoMode } from "@/lib/demo-mode";
 
 export default async function DashboardPage() {
-  const { trays, issues } = await getDashboardData();
+  const { trays, issues } = await getDashboardData(await isDemoMode());
   const activeIssues = issues.filter((issue) => issue.status === "active");
   const issueSamples = new Set(activeIssues.map((issue) => issue.sample_id)).size;
   const totalSamples = trays.reduce((sum, tray) => sum + (tray.samples?.length ?? 0), 0);

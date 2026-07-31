@@ -45,7 +45,7 @@ export function IssueTable({ issues, categories }: { issues: SampleIssue[]; cate
       <div className="table-wrap">
         <table className="data-table">
           <thead><tr><th>Issue ID</th><th>Tray</th><th>Sample</th><th>Category</th><th>Stage</th><th>Ownership</th><th>Operator</th><th>Reported</th><th>Photo</th></tr></thead>
-          <tbody>{filtered.map((issue) => <tr key={issue.id}><td className="font-mono text-xs">{issue.id.slice(0,8)}…</td><td>{issue.trays?.tray_code}</td><td><strong>{issue.samples?.sample_number}</strong></td><td>{issue.issue_categories?.name}</td><td>{STAGE_LABELS[issue.processing_stage]}</td><td>{issue.ownership_snapshot}</td><td>{issue.profiles?.display_name}</td><td>{formatDate(issue.reported_at)}</td><td>{issue.photo_storage_path ? "Yes" : "No"}</td></tr>)}</tbody>
+          <tbody>{filtered.map((issue) => <tr key={issue.id}><td className="font-mono text-xs">{issue.id.slice(0,8)}…{issue.is_demo && <span className="ml-2 rounded-full bg-[#fff1b8] px-2 py-1 text-[9px] font-black uppercase">Demo</span>}</td><td>{issue.trays?.tray_code}</td><td><strong>{issue.samples?.sample_number}</strong></td><td>{issue.issue_categories?.name}</td><td>{STAGE_LABELS[issue.processing_stage]}</td><td>{issue.ownership_snapshot}</td><td>{issue.profiles?.display_name}</td><td>{formatDate(issue.reported_at)}</td><td>{issue.is_demo ? "Demo" : issue.photo_storage_path ? "Yes" : "No"}</td></tr>)}</tbody>
         </table>
       </div>
     </>
