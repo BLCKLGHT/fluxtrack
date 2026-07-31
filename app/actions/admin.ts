@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { trayCodeSchema } from "@/lib/validation";
+import { parseSampleNumbers, physicalTrayCodeSchema } from "@/lib/validation";
 import type { ActionState } from "@/app/actions/trays";
 import { SUPABASE_URL } from "@/lib/config";
 
@@ -57,37 +57,37 @@ export async function setCategoryActive(categoryId: string, active: boolean) {
 }
 
 const traySchema = z.object({
-  trayCode: trayCodeSchema,
+  trayCode: physicalTrayCodeSchema,
   trayName: z.string().trim().min(2).max(120),
   source: z.string().trim().min(2).max(120),
-  startSample: z.coerce.number().int().positive(),
-  endSample: z.coerce.number().int().positive(),
-}).refine((data) => data.endSample >= data.startSample && data.endSample - data.startSample <= 200, {
-  message: "Choose a valid sample range of no more than 201 samples.",
+  samples: z.string().trim().min(1),
 });
 
 export async function createTray(_: ActionState, formData: FormData): Promise<ActionState> {
-  const profile = await requireProfile(["administrator"]);
+  await requireProfile(["administrator"]);
   const parsed = traySchema.safeParse({
     trayCode: formData.get("trayCode"), trayName: formData.get("trayName"),
-    source: formData.get("source"), startSample: formData.get("startSample"),
-    endSample: formData.get("endSample"),
+    source: formData.get("source"), samples: formData.get("samples"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the tray details." };
+  let sampleNumbers: string[];
+  try {
+    sampleNumbers = parseSampleNumbers(parsed.data.samples);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Check the sample numbers." };
+  }
   const supabase = await createClient();
-  const { data: tray, error } = await supabase.from("trays").insert({
-    tray_code: parsed.data.trayCode, tray_name: parsed.data.trayName,
-    source: parsed.data.source, created_by: profile.id,
-  }).select("id").single();
-  if (error || !tray) return { error: "The tray could not be created. Check that the code is unique." };
-  const samples = Array.from({ length: parsed.data.endSample - parsed.data.startSample + 1 }, (_, index) => {
-    const number = parsed.data.startSample + index;
-    return { tray_id: tray.id, sample_number: String(number), pot_cell_number: number };
+  const { error } = await supabase.rpc("create_tray_template", {
+    p_tray_code: parsed.data.trayCode,
+    p_tray_name: parsed.data.trayName,
+    p_source: parsed.data.source,
+    p_sample_numbers: sampleNumbers,
   });
-  const { error: samplesError } = await supabase.from("samples").insert(samples);
-  if (samplesError) return { error: "The tray was created but its samples require administrator attention." };
+  if (error) return { error: "The physical tray could not be created. Check that its code and sample numbers are unique." };
   revalidatePath("/dashboard/trays");
-  return { success: "Tray and samples created." };
+  revalidatePath("/dashboard/workflow");
+  revalidatePath("/dashboard/labels");
+  return { success: "Physical tray created. Its permanent QR label is ready to print." };
 }
 
 export async function voidIssue(issueId: string, trayCode: string, _: ActionState, formData: FormData): Promise<ActionState> {

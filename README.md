@@ -14,16 +14,19 @@ are complete.
 ## Operator workflow
 
 1. Sign in with a Supabase Auth email/password account.
-2. Scan a trusted tray QR or enter `FLUX-TEST-001`.
-3. Select **Log Tray Received**. The database records the authenticated operator
+2. Scan the permanent physical-tray QR or enter `FLUX-TEST-001`.
+3. Resume its open run, or start a fresh dated run when the previous one is complete.
+4. Select **Log Tray Received**. The database records the authenticated operator
    and authoritative timestamp.
-4. Tap a sample, select stage and reason, optionally comment, then select
+5. Tap a sample, select stage and reason, optionally comment, then select
    **Take Photo and Submit Issue**.
-5. Taking/choosing the photo is final confirmation. The app validates and
+6. Taking/choosing the photo is final confirmation. The app validates and
    re-encodes it in memory, uploads it to private Storage, and calls an
    idempotent database operation. There is no second submit button.
-6. Return later and continue from the database-backed tray state.
-7. Select **Complete Tray**, review the counts, and confirm.
+7. Return later and continue from the database-backed tray state.
+8. Select **Complete Tray**, review the counts, and confirm. The next time that
+   physical tray comes through, its scan can create the next run without
+   changing the QR label or overwriting this run.
 
 ## State model
 
@@ -207,17 +210,19 @@ a scheduled orphan reconciliation job.
 After setting `NEXT_PUBLIC_APP_URL` to the exact deployed origin, open:
 
 ```text
-/dashboard/trays/FLUX-TEST-001/qr
+/dashboard/tray-sets/FLUX-TEST-001/qr
 ```
 
 The page renders an A4 label, readable code and fallback URL, and PNG/SVG
 downloads. Its payload is:
 
 ```text
-https://YOUR_APP_DOMAIN/operator/trays/FLUX-TEST-001
+https://YOUR_APP_DOMAIN/operator/tray-sets/FLUX-TEST-001
 ```
 
-The scanner accepts only the configured origin and exact operator tray route.
+The scanner accepts only the configured origin and exact operator routes. The
+permanent physical-tray route resumes its one open run or offers to start the
+next dated run. Legacy run-specific QR links remain readable.
 
 ## Tests and quality checks
 

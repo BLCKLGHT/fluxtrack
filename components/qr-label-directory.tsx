@@ -3,10 +3,9 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Printer, QrCode, Search } from "lucide-react";
-import type { Tray } from "@/lib/domain";
-import { TrayStatusBadge } from "@/components/status-badge";
+import type { TrayTemplate } from "@/lib/domain";
 
-export function QrLabelDirectory({ trays }: { trays: Tray[] }) {
+export function QrLabelDirectory({ trays }: { trays: TrayTemplate[] }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -34,7 +33,7 @@ export function QrLabelDirectory({ trays }: { trays: Tray[] }) {
       <p className="muted my-4 text-sm font-bold">{filtered.length} {filtered.length === 1 ? "tray" : "trays"} ready for labels</p>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((tray) => {
-          const samples = tray.samples ?? [];
+          const samples = tray.tray_template_samples ?? [];
           const sampleNumbers = samples.map((sample) => Number(sample.sample_number)).filter(Number.isFinite);
           const first = sampleNumbers.length ? Math.min(...sampleNumbers) : null;
           const last = sampleNumbers.length ? Math.max(...sampleNumbers) : null;
@@ -44,7 +43,7 @@ export function QrLabelDirectory({ trays }: { trays: Tray[] }) {
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#e7f4ed] text-[var(--green)]">
                   <QrCode size={24} aria-hidden />
                 </span>
-                <TrayStatusBadge status={tray.status} />
+                <span className="rounded-full bg-[#e7f4ed] px-3 py-1 text-xs font-extrabold text-[var(--green)]">Permanent label</span>
               </div>
               <h2 className="mt-5 text-2xl font-black tracking-[-.04em]">{tray.tray_code}</h2>
               <p className="muted mt-1 text-sm font-semibold">{tray.tray_name} · {tray.source}</p>
@@ -52,13 +51,13 @@ export function QrLabelDirectory({ trays }: { trays: Tray[] }) {
                 <div><dt className="muted text-xs font-bold uppercase">Samples</dt><dd className="mt-1 font-extrabold">{samples.length}</dd></div>
                 <div><dt className="muted text-xs font-bold uppercase">Range</dt><dd className="mt-1 font-extrabold">{first !== null ? `${first}–${last}` : "—"}</dd></div>
               </dl>
-              <p className="mt-4 text-xs font-bold text-[var(--green-dark)]">QR assigned to this tray code</p>
+              <p className="mt-4 text-xs font-bold text-[var(--green-dark)]">Print once · reuse every processing round</p>
               <div className="mt-auto grid gap-2 pt-5 sm:grid-cols-2">
-                <Link className="btn btn-primary" href={`/dashboard/trays/${tray.tray_code}/qr`}>
+                <Link className="btn btn-primary" href={`/dashboard/tray-sets/${tray.tray_code}/qr`}>
                   <Printer size={18} aria-hidden />Generate & print
                 </Link>
-                <Link className="btn btn-secondary" href={`/dashboard/trays/${tray.tray_code}`}>
-                  <ExternalLink size={18} aria-hidden />Tray record
+                <Link className="btn btn-secondary" href={`/dashboard/tray-sets/${tray.tray_code}`}>
+                  <ExternalLink size={18} aria-hidden />Run history
                 </Link>
               </div>
             </article>

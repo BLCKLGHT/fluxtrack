@@ -29,6 +29,17 @@ export async function receiveTray(trayId: string, trayCode: string, version: num
   return { success: "Tray received. Samples are ready." };
 }
 
+export async function startTrayRun(templateId: string, previousState: ActionState): Promise<ActionState> {
+  void previousState;
+  await requireProfile(["process_operator", "administrator"]);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("start_tray_run", { p_template_id: templateId });
+  if (error || !data?.tray_code) return { error: friendlyDatabaseError(error?.message ?? "Unable to start tray run") };
+  revalidatePath("/operator/trays");
+  revalidatePath("/dashboard/workflow");
+  redirect(`/operator/trays/${data.tray_code}`);
+}
+
 export async function completeTray(trayId: string, trayCode: string, version: number): Promise<ActionState> {
   await requireProfile(["process_operator", "administrator"]);
   const safeCode = trayCodeSchema.parse(trayCode);

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
 import { Camera, Keyboard, LoaderCircle } from "lucide-react";
-import { parseTrustedTrayQr, trayCodeSchema } from "@/lib/validation";
+import { parseTrustedFluxQr, trayCodeSchema } from "@/lib/validation";
 
 export function QrScanner({ appOrigin }: { appOrigin: string }) {
   const router = useRouter();
@@ -28,13 +28,13 @@ export function QrScanner({ appOrigin }: { appOrigin: string }) {
         videoRef.current,
         (result) => {
           if (!result) return;
-          const code = parseTrustedTrayQr(result.getText(), appOrigin);
-          if (!code) {
+          const target = parseTrustedFluxQr(result.getText(), appOrigin);
+          if (!target) {
             setError("That QR code is not a valid FluxTrack tray link.");
             return;
           }
           controlsRef.current?.stop();
-          router.push(`/operator/trays/${code}`);
+          router.push(target.kind === "template" ? `/operator/tray-sets/${target.code}` : `/operator/trays/${target.code}`);
         },
       );
       setCameraOn(true);
@@ -52,7 +52,7 @@ export function QrScanner({ appOrigin }: { appOrigin: string }) {
       setError("Enter a tray code such as FLUX-TEST-001.");
       return;
     }
-    router.push(`/operator/trays/${parsed.data}`);
+    router.push(`/operator/tray-sets/${parsed.data}`);
   }
 
   return (

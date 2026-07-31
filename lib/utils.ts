@@ -13,6 +13,11 @@ export function formatDate(value: string | null | undefined) {
   }).format(new Date(value));
 }
 
+export function formatDay(value: string | null | undefined) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("en-AU", { dateStyle: "medium" }).format(new Date(`${value}T00:00:00`));
+}
+
 export function elapsed(start: string | null, end: string | null) {
   if (!start) return "—";
   const ms = new Date(end ?? Date.now()).getTime() - new Date(start).getTime();

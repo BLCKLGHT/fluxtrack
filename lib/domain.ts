@@ -67,9 +67,31 @@ export interface Tray {
   reopened_by: string | null;
   reopen_reason: string | null;
   version: number;
+  template_id: string | null;
+  run_number: number | null;
+  processing_date: string;
   samples?: Sample[];
   received_profile?: Pick<Profile, "display_name"> | null;
   completed_profile?: Pick<Profile, "display_name"> | null;
+}
+
+export interface TrayTemplateSample {
+  id: string;
+  template_id: string;
+  sample_number: string;
+  pot_cell_number: number | null;
+  display_order: number;
+}
+
+export interface TrayTemplate {
+  id: string;
+  tray_code: string;
+  tray_name: string;
+  source: string;
+  active: boolean;
+  created_at: string;
+  tray_template_samples?: TrayTemplateSample[];
+  trays?: Tray[];
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { issueSchema, parseTrustedTrayQr, registerSchema, trayCodeSchema } from "@/lib/validation";
+import { issueSchema, parseSampleNumbers, parseTrustedFluxQr, parseTrustedTrayQr, registerSchema, trayCodeSchema } from "@/lib/validation";
 
 describe("tray code validation", () => {
   it("normalises a valid code", () => {
@@ -19,6 +19,13 @@ describe("trusted QR parsing", () => {
     )).toBe("FLUX-TEST-001");
   });
 
+  it("recognises a permanent physical-tray label", () => {
+    expect(parseTrustedFluxQr(
+      "https://flux.example/operator/tray-sets/FLUX-TEST-001",
+      "https://flux.example",
+    )).toEqual({ kind: "template", code: "FLUX-TEST-001" });
+  });
+
   it.each([
     "https://evil.example/operator/trays/FLUX-TEST-001",
     "https://flux.example/dashboard/trays/FLUX-TEST-001",
@@ -26,6 +33,17 @@ describe("trusted QR parsing", () => {
     "not a URL",
   ])("rejects an invalid QR payload: %s", (value) => {
     expect(parseTrustedTrayQr(value, "https://flux.example")).toBeNull();
+  });
+});
+
+describe("sample layout parsing", () => {
+  it("expands ranges and preserves explicit sample IDs", () => {
+    expect(parseSampleNumbers("2001-2003, CELL-7")).toEqual(["2001", "2002", "2003", "CELL-7"]);
+  });
+
+  it("rejects duplicates and oversized ranges", () => {
+    expect(() => parseSampleNumbers("2001, 2001")).toThrow(/unique/i);
+    expect(() => parseSampleNumbers("1-51")).toThrow(/50/);
   });
 });
 

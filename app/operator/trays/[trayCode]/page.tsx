@@ -4,7 +4,7 @@ import { ReceiveTrayButton } from "@/components/tray-action-button";
 import { SampleList } from "@/components/sample-list";
 import { TrayStatusBadge } from "@/components/status-badge";
 import { getTray } from "@/lib/queries";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDay } from "@/lib/utils";
 import { trayCodeSchema } from "@/lib/validation";
 
 export default async function OperatorTrayPage({ params, searchParams }: {
@@ -24,7 +24,7 @@ export default async function OperatorTrayPage({ params, searchParams }: {
       {query.submitted === "1" && <div className="notice notice-success mt-5" role="status">Issue saved with photographic evidence.</div>}
       <section className="mt-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div><p className="eyebrow">Tray</p><h1 className="page-title mt-2">{tray.tray_code}</h1><p className="muted mt-2 font-semibold">{tray.tray_name} · {tray.source}</p></div>
+          <div><p className="eyebrow">Processing run {tray.run_number ?? 1}</p><h1 className="page-title mt-2">{tray.tray_code}</h1><p className="muted mt-2 font-semibold">{tray.tray_name} · {tray.source} · {formatDay(tray.processing_date)}</p></div>
           <TrayStatusBadge status={tray.status} />
         </div>
         <div className="card mt-6 grid grid-cols-2 gap-px overflow-hidden bg-[var(--line)] sm:grid-cols-4">

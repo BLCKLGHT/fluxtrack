@@ -8,7 +8,7 @@ export default async function DashboardTraysPage() {
   return (
     <main id="main">
       <p className="eyebrow">Records</p><h1 className="page-title mt-3">Trays</h1>
-      <p className="muted mt-3">Search lifecycle, operator, sample, and issue totals.</p>
+      <p className="muted mt-3">Search individual dated processing runs, operator, sample, and issue totals.</p>
       {profile.role === "administrator" && <CreateTrayForm />}
       <TrayTable trays={trays} />
     </main>

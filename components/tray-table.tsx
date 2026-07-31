@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Tray, TrayStatus } from "@/lib/domain";
 import { TrayStatusBadge } from "@/components/status-badge";
-import { elapsed, formatDate } from "@/lib/utils";
+import { elapsed, formatDate, formatDay } from "@/lib/utils";
 
 export function TrayTable({ trays }: { trays: Tray[] }) {
   const [code, setCode] = useState("");
@@ -29,7 +29,7 @@ export function TrayTable({ trays }: { trays: Tray[] }) {
       <p className="muted my-4 text-sm font-bold">{filtered.length} matching {filtered.length === 1 ? "tray" : "trays"}</p>
       <div className="table-wrap">
         <table className="data-table">
-          <thead><tr><th>Tray</th><th>Status</th><th>Received</th><th>Completed</th><th>Samples</th><th>Issue samples</th><th>Issues</th><th>Elapsed</th><th><span className="sr-only">Actions</span></th></tr></thead>
+          <thead><tr><th>Processing run</th><th>Date</th><th>Status</th><th>Received</th><th>Completed</th><th>Samples</th><th>Issue samples</th><th>Issues</th><th>Elapsed</th><th><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>
             {filtered.map((tray) => {
               const samples = tray.samples ?? [];
@@ -38,12 +38,13 @@ export function TrayTable({ trays }: { trays: Tray[] }) {
               return (
                 <tr key={tray.id}>
                   <td><strong>{tray.tray_code}</strong><br /><span className="muted text-xs">{tray.source}</span></td>
+                  <td>{formatDay(tray.processing_date)}</td>
                   <td><TrayStatusBadge status={tray.status as TrayStatus} /></td>
                   <td>{formatDate(tray.received_at)}<br /><span className="muted text-xs">{tray.received_profile?.display_name}</span></td>
                   <td>{formatDate(tray.completed_at)}<br /><span className="muted text-xs">{tray.completed_profile?.display_name}</span></td>
                   <td>{samples.length}</td><td>{issueSamples}</td><td>{issues.length}</td>
                   <td>{elapsed(tray.received_at, tray.completed_at)}</td>
-                  <td><div className="flex gap-3"><Link className="font-bold text-[var(--green)]" href={`/dashboard/trays/${tray.tray_code}`}>View</Link><Link className="font-bold text-[var(--green)]" href={`/dashboard/trays/${tray.tray_code}/qr`}>QR label</Link></div></td>
+                  <td><Link className="font-bold text-[var(--green)]" href={`/dashboard/trays/${tray.tray_code}`}>View run</Link></td>
                 </tr>
               );
             })}

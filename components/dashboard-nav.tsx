@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ClipboardList, FlaskConical, Gauge, QrCode, ScanLine, Settings, ShieldCheck, Users } from "lucide-react";
+import { ClipboardList, FlaskConical, Gauge, QrCode, ScanLine, Settings, ShieldCheck, Users, Workflow } from "lucide-react";
 import { Brand } from "@/components/brand";
 import type { UserRole } from "@/lib/domain";
 
 const common = [
   { href: "/dashboard", label: "Overview", icon: Gauge },
+  { href: "/dashboard/workflow", label: "Tray workflow", icon: Workflow },
   { href: "/dashboard/trays", label: "Trays", icon: ClipboardList },
   { href: "/dashboard/labels", label: "QR labels", icon: QrCode },
   { href: "/dashboard/issues", label: "Issues & export", icon: FlaskConical },

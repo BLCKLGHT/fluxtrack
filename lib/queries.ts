@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { IssueCategory, SampleIssue, Tray } from "@/lib/domain";
+import type { IssueCategory, SampleIssue, Tray, TrayTemplate } from "@/lib/domain";
 
 export const getTray = cache(async (trayCode: string): Promise<Tray> => {
   const supabase = await createClient();
@@ -52,6 +52,29 @@ export async function getTrays(statuses?: string[]): Promise<Tray[]> {
   if (error) throw new Error("Unable to load trays.");
   return data as unknown as Tray[];
 }
+
+export async function getTrayTemplates(): Promise<TrayTemplate[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tray_templates")
+    .select(`
+      *,
+      tray_template_samples(*),
+      trays(*, samples(id, status, sample_issues(id, sample_id, status)))
+    `)
+    .order("tray_code")
+    .order("display_order", { referencedTable: "tray_template_samples", ascending: true })
+    .order("created_at", { referencedTable: "trays", ascending: false });
+  if (error) throw new Error("Unable to load the physical tray workflow.");
+  return data as unknown as TrayTemplate[];
+}
+
+export const getTrayTemplate = cache(async (trayCode: string): Promise<TrayTemplate> => {
+  const templates = await getTrayTemplates();
+  const template = templates.find((item) => item.tray_code === trayCode.toUpperCase());
+  if (!template) notFound();
+  return template;
+});
 
 export async function getIssues(): Promise<SampleIssue[]> {
   const supabase = await createClient();

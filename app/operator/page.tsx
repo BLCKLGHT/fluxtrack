@@ -20,7 +20,7 @@ export default async function OperatorHome() {
       </Link>
       <div className="mt-8 flex items-center justify-between">
         <h2 className="text-lg font-extrabold">Most recent tray</h2>
-        <Link href="/operator/trays" className="text-sm font-bold text-[var(--green)]">View all</Link>
+        <Link href="/operator/tray-sets" className="text-sm font-bold text-[var(--green)]">View workflow</Link>
       </div>
       {latest ? (
         <Link href={`/operator/trays/${latest.tray_code}`} className="card mt-4 block p-5 text-inherit no-underline">
@@ -28,7 +28,7 @@ export default async function OperatorHome() {
             <div><p className="text-2xl font-black tracking-[-.04em]">{latest.tray_code}</p><p className="muted mt-1 text-sm">{latest.tray_name} · {latest.source}</p></div>
             <ArrowRight size={22} aria-hidden />
           </div>
-          <div className="mt-5"><TrayStatusBadge status={latest.status} /></div>
+          <div className="mt-5 flex items-center justify-between"><TrayStatusBadge status={latest.status} /><span className="muted text-xs font-bold">Run {latest.run_number ?? 1}</span></div>
         </Link>
       ) : (
         <div className="card mt-4 p-6 text-center">
