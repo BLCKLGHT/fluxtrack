@@ -18,8 +18,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
             alt="Hayes Industries"
             width={2435}
             height={633}
-            sizes="(min-width: 1024px) 260px, (min-width: 640px) 230px, 190px"
-            className="h-auto w-[190px] sm:w-[230px] lg:w-[260px]"
+            sizes="(min-width: 1024px) 140px, (min-width: 640px) 120px, 100px"
+            className="h-auto w-[100px] sm:w-[120px] lg:w-[140px]"
             priority
           />
         </div>
