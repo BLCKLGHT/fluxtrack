@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ClipboardList, FlaskConical, Gauge, QrCode, ScanLine, Settings, ShieldCheck, Users, Workflow } from "lucide-react";
+import { CircleUserRound, ClipboardList, FlaskConical, Gauge, QrCode, ScanLine, Settings, ShieldCheck, Users, Workflow } from "lucide-react";
 import { Brand } from "@/components/brand";
 import type { UserRole } from "@/lib/domain";
 
@@ -30,6 +30,9 @@ export function DashboardNav({ role }: { role: UserRole }) {
         ))}
         <Link href="/operator" className="flex min-h-12 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-bold text-[#415047] no-underline hover:bg-[#eef3ef]">
           <ScanLine size={19} aria-hidden />Operator app
+        </Link>
+        <Link href="/operator/account" className="flex min-h-12 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-bold text-[#415047] no-underline hover:bg-[#eef3ef]">
+          <CircleUserRound size={19} aria-hidden />My account
         </Link>
       </nav>
     </aside>

@@ -10,7 +10,7 @@ export const getSessionProfile = cache(async (): Promise<Profile | null> => {
   if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
-    .select("id, display_name, email, role, active")
+    .select("id, display_name, email, role, active, notification_preferences(issue_email_enabled)")
     .eq("id", userId)
     .eq("active", true)
     .single();

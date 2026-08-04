@@ -60,7 +60,8 @@ exception samples remain `issue_reported`.
 - Zod at external boundaries and React Hook Form on the issue workflow
 - `@zxing/browser` scanning and `qrcode` label generation
 - Private `sample-issue-photos` bucket and five-minute signed dashboard URLs
-- Notification outbox plus an email adapter boundary; no external mail by default
+- Per-user flagged-sample subscriptions, durable notification delivery records,
+  and a Resend email adapter with retry support
 - Vercel-compatible deployment and a narrow service worker that caches no
   records or photographs
 
@@ -102,7 +103,10 @@ Open `http://localhost:3000`. Add the values below before signing in.
 | `NEXT_PUBLIC_MAX_IMAGE_BYTES` | Browser | Maximum input bytes; default 12 MiB |
 | `NEXT_PUBLIC_IMAGE_TARGET_BYTES` | Browser | Compression target; default ~2 MB |
 | `NEXT_PUBLIC_IMAGE_MAX_DIMENSION` | Browser | Long-edge resize; default 2200 px |
-| `EMAIL_PROVIDER`, `EMAIL_API_KEY`, `EMAIL_FROM` | Server only | Reserved for a future outbox worker |
+| `EMAIL_PROVIDER` | Server only | Set to `resend` to enable flagged-sample email delivery |
+| `EMAIL_API_KEY` | Server only | Resend API key used by the delivery worker |
+| `EMAIL_FROM` | Server only | Verified sender, for example `FluxTrack <alerts@example.com>` |
+| `CRON_SECRET` | Server only | Random secret used by Vercel to authenticate the daily retry job |
 
 Never prefix the service-role key with `NEXT_PUBLIC_`, place it in source
 control, or use it in browser code.
@@ -186,9 +190,24 @@ where id = (select id from auth.users where email = 'YOUR_SYNTHETIC_VIEWER_EMAIL
 ```
 
 Leave the operator profile at its default `process_operator` role. The
-administrator’s `/dashboard/users` page can then create/deactivate prototype
-users using server-only Auth administration. Share temporary credentials only
-through an approved secure channel.
+administrator’s `/dashboard/users` page can then create users and drill into
+each account to change its role, active state, and flagged-sample email
+subscription. Every signed-in user can also subscribe or unsubscribe under
+**My account**. Share temporary credentials only through an approved secure
+channel.
+
+## Flagged-sample email notifications
+
+When an operator flags a sample, the database snapshots one delivery for every
+active subscribed user. The issue submission triggers immediate delivery, and
+a daily Vercel job retries queued failures. Delivery records remain visible to
+administrators under **Dashboard → Users**.
+
+To enable sending in Vercel, add `EMAIL_PROVIDER=resend`, `EMAIL_API_KEY`, a
+verified `EMAIL_FROM`, `CRON_SECRET`, and either `SUPABASE_SECRET_KEY` or
+`SUPABASE_SERVICE_ROLE_KEY` to the Production environment. Without them the
+subscriptions and queue still work, but messages remain pending instead of
+being discarded.
 
 ## Photograph behaviour
 

@@ -10,6 +10,7 @@ export interface Profile {
   email: string;
   role: UserRole;
   active: boolean;
+  notification_preferences?: { issue_email_enabled: boolean } | null;
 }
 
 export interface IssueCategory {

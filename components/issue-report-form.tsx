@@ -127,6 +127,7 @@ export function IssueReportForm({
       if (issueError) throw new Error(issueError.message.includes("duplicate") ? "This issue was already submitted." : "The issue could not be saved. The uploaded photograph will be removed.");
 
       setStatus("Issue saved.");
+      void fetch("/api/notifications/deliver", { method: "POST", keepalive: true }).catch(() => undefined);
       event.target.value = "";
       router.push(`/operator/trays/${trayCode}?submitted=1`);
       router.refresh();

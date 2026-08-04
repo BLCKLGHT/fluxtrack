@@ -49,6 +49,31 @@ export async function setUserActive(userId: string, active: boolean) {
   revalidatePath("/dashboard/users");
 }
 
+const accessSchema = z.object({
+  role: z.enum(["process_operator", "team_viewer", "administrator"]),
+  active: z.boolean(),
+  issueEmailEnabled: z.boolean(),
+});
+
+export async function updateUserAccess(userId: string, _: ActionState, formData: FormData): Promise<ActionState> {
+  await requireProfile(["administrator"]);
+  if (!z.string().uuid().safeParse(userId).success) return { error: "Invalid user." };
+  const parsed = accessSchema.safeParse({
+    role: formData.get("role"), active: formData.get("active") === "on",
+    issueEmailEnabled: formData.get("issueEmailEnabled") === "on",
+  });
+  if (!parsed.success) return { error: "Check the access settings." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_update_user_access", {
+    p_profile_id: userId, p_role: parsed.data.role, p_active: parsed.data.active,
+    p_issue_email_enabled: parsed.data.issueEmailEnabled,
+  });
+  if (error) return { error: error.message.includes("own account") ? error.message : "The user settings could not be updated." };
+  revalidatePath("/dashboard/users");
+  revalidatePath(`/dashboard/users/${userId}`);
+  return { success: "User access and notifications updated." };
+}
+
 export async function setCategoryActive(categoryId: string, active: boolean) {
   await requireProfile(["administrator"]);
   const supabase = await createClient();
